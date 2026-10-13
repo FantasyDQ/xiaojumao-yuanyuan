@@ -1,8 +1,6 @@
 # 🐱 小橘猫缘缘 — AI 桌面宠物
 
-> 一只住在主人电脑里的 AI 橘猫，贪吃爱撒娇，但干活绝不含糊！
-
-双击聊天，右键开菜单，拖文件进来帮你读。能写代码、操作电脑、生成文档、接入外部工具……远不止聊天。
+> 一只住在主人电脑里的 AI 橘猫，贪吃爱撒娇！
 
 [能力规格 CAPABILITIES.md](CAPABILITIES.md) · [设计哲学 DESIGN.md](DESIGN.md) · [main.js 索引](main_js_index.md) · License: MIT · Electron 33
 
