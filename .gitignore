@@ -1,0 +1,30 @@
+# 依赖
+node_modules/
+
+# 打包产物
+dist/
+dist-config/
+build/
+python/
+
+# 敏感配置（含 API Key，切勿提交）
+.env
+.env.local
+config.json
+
+# 开发期测试/检查脚本（仅本地使用，不上传）
+check_*.js
+test_*.js
+verify-*.js
+fixture_*.js
+_tmp_*.js
+
+# 角色设定文档（个人内容，不上传）
+小橘猫缘缘 ☘.md
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+.vscode/
+.claude/
+*.log

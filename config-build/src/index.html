@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小橘猫缘缘</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <!-- ============ 宠物主体 ============ -->
+  <div id="pet-container">
+    <div id="pet" class="cat" data-mood="normal">      <svg viewBox="0 0 200 220" width="160" height="176" id="cat-svg">
+        <!-- 影子（呼吸时缩放） -->
+        <ellipse class="shadow" cx="100" cy="212" rx="52" ry="7" />
+
+        <!-- 尾巴（摇摆动画） -->
+        <g class="cat-tail" style="transform-origin: 140px 160px;">
+          <path class="tail-path" d="M140 162 Q178 150 176 108 Q176 88 160 88"
+                stroke="#F5A623" stroke-width="22" fill="none" stroke-linecap="round" />
+          <path class="tail-stripe" d="M168 150 Q173 138 172 126"
+                stroke="#E8852A" stroke-width="4.5" fill="none" stroke-linecap="round" />
+        </g>
+
+        <!-- 身体 -->
+        <g class="cat-body">
+          <ellipse cx="100" cy="158" rx="50" ry="46" fill="#F5A623" />
+          <!-- 白色肚子 -->
+          <ellipse cx="100" cy="168" rx="29" ry="33" fill="#FFF4E6" />
+          <!-- 身体条纹 -->
+          <path d="M56 138 Q62 132 68 140" stroke="#E8852A" stroke-width="4" fill="none" stroke-linecap="round" />
+          <path d="M132 140 Q138 132 144 138" stroke="#E8852A" stroke-width="4" fill="none" stroke-linecap="round" />
+          <!-- 前腿（分组，可单独动画） -->
+          <g class="leg leg-left">
+            <ellipse cx="80" cy="192" rx="15" ry="13" fill="#F5A623" />
+            <ellipse cx="80" cy="194" rx="10" ry="7" fill="#FFF4E6" />
+          </g>
+          <g class="leg leg-right">
+            <ellipse cx="120" cy="192" rx="15" ry="13" fill="#F5A623" />
+            <ellipse cx="120" cy="194" rx="10" ry="7" fill="#FFF4E6" />
+          </g>
+        </g>
+
+        <!-- 头部（呼吸缩放） -->
+        <g class="cat-head" style="transform-origin: 100px 100px;">
+          <!-- 耳朵 -->
+          <g class="ear left-ear">
+            <path d="M56 72 L48 30 L84 60 Z" fill="#F5A623" />
+            <path d="M60 66 L54 42 L76 58 Z" fill="#FFB6C1" />
+          </g>
+          <g class="ear right-ear">
+            <path d="M144 72 L152 30 L116 60 Z" fill="#F5A623" />
+            <path d="M140 66 L146 42 L124 58 Z" fill="#FFB6C1" />
+          </g>
+
+          <!-- 脸 -->
+          <ellipse cx="100" cy="88" rx="50" ry="46" fill="#F5A623" />
+          <!-- 头部条纹 -->
+          <path d="M100 44 L100 56" stroke="#E8852A" stroke-width="4" fill="none" stroke-linecap="round" />
+          <path d="M76 50 Q80 56 76 62" stroke="#E8852A" stroke-width="3.5" fill="none" stroke-linecap="round" />
+          <path d="M124 50 Q120 56 124 62" stroke="#E8852A" stroke-width="3.5" fill="none" stroke-linecap="round" />
+
+          <!-- 脸下部白色 -->
+          <ellipse cx="100" cy="102" rx="31" ry="26" fill="#FFF4E6" />
+
+          <!-- 腮红 -->
+          <ellipse class="blush" cx="70" cy="100" rx="9" ry="5.5" fill="#FF9DAE" opacity="0.7" />
+          <ellipse class="blush" cx="130" cy="100" rx="9" ry="5.5" fill="#FF9DAE" opacity="0.7" />
+
+          <!-- 眼睛：普通（圆眼，会眨眼） -->
+          <g class="eye-normal">
+            <g class="eye left-eye">
+              <ellipse class="eye-shape" cx="82" cy="84" rx="9.5" ry="12.5" fill="#2B2B2B" />
+              <ellipse class="eye-shine" cx="85" cy="79" rx="3.2" ry="4.5" fill="#FFFFFF" />
+              <ellipse class="eye-shine2" cx="79" cy="90" rx="1.4" ry="2" fill="#FFFFFF" opacity="0.6" />
+            </g>
+            <g class="eye right-eye">
+              <ellipse class="eye-shape" cx="118" cy="84" rx="9.5" ry="12.5" fill="#2B2B2B" />
+              <ellipse class="eye-shine" cx="121" cy="79" rx="3.2" ry="4.5" fill="#FFFFFF" />
+              <ellipse class="eye-shine2" cx="115" cy="90" rx="1.4" ry="2" fill="#FFFFFF" opacity="0.6" />
+            </g>
+          </g>
+
+          <!-- 眼睛：开心（^_^ 弧线） -->
+          <g class="eye-happy">
+            <path d="M73 86 Q82 76 91 86" stroke="#2B2B2B" stroke-width="3.5" fill="none" stroke-linecap="round" />
+            <path d="M109 86 Q118 76 127 86" stroke="#2B2B2B" stroke-width="3.5" fill="none" stroke-linecap="round" />
+          </g>
+
+          <!-- 眼睛：困（-_- 横线） -->
+          <g class="eye-sleepy">
+            <path d="M73 84 L91 84" stroke="#2B2B2B" stroke-width="3.5" fill="none" stroke-linecap="round" />
+            <path d="M109 84 L127 84" stroke="#2B2B2B" stroke-width="3.5" fill="none" stroke-linecap="round" />
+          </g>
+
+          <!-- 眼睛：惊讶（O O 大圆） -->
+          <g class="eye-surprised">
+            <ellipse cx="82" cy="84" rx="6" ry="8" fill="#2B2B2B" />
+            <ellipse cx="118" cy="84" rx="6" ry="8" fill="#2B2B2B" />
+          </g>
+
+          <!-- 鼻子 -->
+          <path d="M96 104 L104 104 L100 109 Z" fill="#FF9DAE" />
+          <!-- 嘴：默认笑嘴 -->
+          <path class="mouth mouth-smile" d="M100 109 Q100 115 93 115 M100 109 Q100 115 107 115"
+                stroke="#7a4a1e" stroke-width="2" fill="none" stroke-linecap="round" />
+          <!-- 嘴：吃东西 -->
+          <path class="mouth mouth-eat" d="M92 112 Q100 120 108 112 Z" fill="#7a4a1e" />
+          <!-- 嘴：哭/难过 -->
+          <path class="mouth mouth-sad" d="M93 116 Q100 110 107 116" stroke="#7a4a1e" stroke-width="2" fill="none" stroke-linecap="round" />
+          <!-- 流口水（饿了） -->
+          <ellipse class="drool" cx="100" cy="118" rx="3" ry="6" fill="#9ad9ff" />
+
+          <!-- 胡须 -->
+          <g class="whiskers" stroke="#9a6a3e" stroke-width="1.3" fill="none" stroke-linecap="round">
+            <path d="M64 100 L42 96" />
+            <path d="M64 106 L42 108" />
+            <path d="M136 100 L158 96" />
+            <path d="M136 106 L158 108" />
+          </g>
+
+          <!-- Zzz 睡觉符号 -->
+          <g class="zzz">
+            <text x="146" y="46" font-size="16" fill="#8aa0ff" font-weight="bold">z</text>
+            <text x="156" y="34" font-size="13" fill="#8aa0ff" font-weight="bold">z</text>
+            <text x="164" y="24" font-size="10" fill="#8aa0ff" font-weight="bold">z</text>
+          </g>
+
+          <!-- 墨镜（唱歌时戴） -->
+          <g class="sunglasses">
+            <!-- 左镜片 -->
+            <rect x="64" y="76" width="24" height="18" rx="6" fill="#1a1a2e" stroke="#333" stroke-width="1.5" />
+            <!-- 右镜片 -->
+            <rect x="112" y="76" width="24" height="18" rx="6" fill="#1a1a2e" stroke="#333" stroke-width="1.5" />
+            <!-- 鼻梁 -->
+            <rect x="88" y="81" width="24" height="4" rx="2" fill="#333" />
+            <!-- 反光 -->
+            <ellipse cx="72" cy="82" rx="5" ry="3" fill="#4a6aaa" opacity="0.6" />
+            <ellipse cx="120" cy="82" rx="5" ry="3" fill="#4a6aaa" opacity="0.6" />
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <!-- ============ 床（睡觉时显示） ============ -->
+    <div id="bed" class="bed hidden">
+      <svg viewBox="0 0 200 80" width="200" height="80">
+        <!-- 床腿 -->
+        <rect x="14" y="56" width="10" height="20" rx="3" fill="#b8865a" />
+        <rect x="176" y="56" width="10" height="20" rx="3" fill="#b8865a" />
+        <!-- 床框 -->
+        <rect x="8" y="44" width="184" height="16" rx="6" fill="#c9925e" />
+        <rect x="8" y="44" width="184" height="6" rx="3" fill="#d9a874" />
+        <!-- 床垫 -->
+        <rect x="16" y="34" width="168" height="14" rx="5" fill="#fff4e6" />
+        <!-- 枕头 -->
+        <ellipse cx="44" cy="32" rx="20" ry="9" fill="#ffe8d0" />
+        <ellipse cx="44" cy="30" rx="18" ry="7" fill="#fff4e6" />
+        <!-- 被子褶皱 -->
+        <path d="M70 36 Q100 32 130 36 Q150 38 168 36" stroke="#ffd9a8" stroke-width="2.5" fill="none" stroke-linecap="round" />
+        <path d="M80 42 Q110 39 140 42" stroke="#ffd9a8" stroke-width="2" fill="none" stroke-linecap="round" />
+      </svg>
+    </div>
+    <!-- 吉他（唱歌时出现） -->
+    <div id="guitar" class="guitar hidden">
+      <svg viewBox="0 0 80 100" width="64" height="80">
+        <!-- 琴头 -->
+        <rect x="33" y="0" width="14" height="10" rx="2" fill="#5a3a1a" />
+        <!-- 琴颈 -->
+        <rect x="36" y="8" width="8" height="38" fill="#8a5a2a" />
+        <!-- 琴弦 -->
+        <line x1="38" y1="8" x2="38" y2="46" stroke="#ddd" stroke-width="0.6" />
+        <line x1="40" y1="8" x2="40" y2="46" stroke="#ddd" stroke-width="0.6" />
+        <line x1="42" y1="8" x2="42" y2="46" stroke="#ddd" stroke-width="0.6" />
+        <!-- 共鸣箱 -->
+        <ellipse cx="40" cy="66" rx="26" ry="28" fill="#d4a050" />
+        <ellipse cx="40" cy="66" rx="22" ry="24" fill="#e8b860" />
+        <!-- 音孔 -->
+        <circle cx="40" cy="62" r="9" fill="#3a2a1a" />
+        <!-- 琴桥 -->
+        <rect x="30" y="76" width="20" height="4" rx="2" fill="#5a3a1a" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- ============ 对话气泡 ============ -->
+  <div id="bubble" class="bubble hidden">
+    <span class="bubble-text"></span>
+    <div class="bubble-tail"></div>
+  </div>
+
+  <!-- ============ 喂食菜单 ============ -->
+  <div id="menu" class="menu hidden"></div>
+
+  <!-- ============ AI 对话框 ============ -->
+  <div id="chatbox" class="chatbox hidden">
+    <div class="chatbox-header">
+      <span class="chatbox-title">🐱 和小橘聊天</span>
+      <button class="chatbox-close" title="关闭">✕</button>
+    </div>
+    <div class="chatbox-messages" id="chatMessages"></div>
+    <div class="chatbox-input">
+      <input type="text" id="chatInput" placeholder="对小橘说点什么…" maxlength="200" />
+      <button id="chatSend" title="发送">发送</button>
+    </div>
+  </div>
+
+  <!-- ============ 待办面板 ============ -->
+  <div id="todopanel" class="todopanel hidden">
+    <div class="todopanel-header">
+      <span class="todopanel-title">📋 待办事项</span>
+      <button class="todopanel-close" title="关闭">✕</button>
+    </div>
+    <div class="todopanel-add">
+      <input type="text" id="todoInput" placeholder="输入待办内容…" maxlength="60" />
+      <div class="todopanel-row">
+        <input type="datetime-local" id="todoTime" />
+        <button id="todoAdd" title="添加">＋ 添加</button>
+      </div>
+    </div>
+    <div class="todopanel-list" id="todoList"></div>
+  </div>
+
+  <!-- ============ 文件选择确认面板 ============ -->
+  <div id="filepanel" class="filepanel hidden">
+    <div class="filepanel-header">
+      <span class="filepanel-title">📂 选择文件</span>
+      <button class="filepanel-close" title="取消">✕</button>
+    </div>
+    <div class="filepanel-desc" id="filepanelDesc"></div>
+    <div class="filepanel-list" id="filepanelList"></div>
+    <div class="filepanel-actions">
+      <button class="filepanel-confirm" id="filepanelConfirm" disabled>确认</button>
+      <button class="filepanel-cancel" id="filepanelCancel">取消</button>
+    </div>
+  </div>
+
+  <!-- ============ 循环提醒管理面板 ============ -->
+  <div id="reminderPanel" class="reminder-panel hidden">
+    <div class="reminder-panel-header">
+      <span class="reminder-panel-title">⏰ 提醒管理</span>
+      <button class="reminder-panel-close" title="关闭">✕</button>
+    </div>
+    <div class="reminder-panel-add">
+      <input type="text" id="reminderInput" placeholder="提醒内容，如：喝水、开会、交周报…" maxlength="60" />
+      <div class="reminder-type-tabs">
+        <button class="reminder-tab active" data-type="interval">间隔重复</button>
+        <button class="reminder-tab" data-type="weekly">定时重复</button>
+      </div>
+      <!-- 间隔模式 -->
+      <div class="reminder-panel-row reminder-mode reminder-mode-interval">
+        <label>间隔</label>
+        <input type="number" id="reminderInterval" value="30" min="1" max="1440" />
+        <select id="reminderUnit">
+          <option value="minutes">分钟</option>
+          <option value="hours">小时</option>
+        </select>
+        <button id="reminderAdd">＋ 添加</button>
+      </div>
+      <!-- 定时模式 -->
+      <div class="reminder-panel-row reminder-mode reminder-mode-weekly" style="display:none;">
+        <label>时间</label>
+        <input type="time" id="reminderTime" value="09:00" />
+        <div class="reminder-weekdays">
+          <label class="weekday-toggle"><input type="checkbox" value="1"><span>一</span></label>
+          <label class="weekday-toggle"><input type="checkbox" value="2"><span>二</span></label>
+          <label class="weekday-toggle"><input type="checkbox" value="3"><span>三</span></label>
+          <label class="weekday-toggle"><input type="checkbox" value="4"><span>四</span></label>
+          <label class="weekday-toggle"><input type="checkbox" value="5"><span>五</span></label>
+          <label class="weekday-toggle"><input type="checkbox" value="6"><span>六</span></label>
+          <label class="weekday-toggle"><input type="checkbox" value="0"><span>日</span></label>
+        </div>
+        <button id="reminderAddWeekly">＋ 添加</button>
+      </div>
+    </div>
+    <div class="reminder-panel-list" id="reminderList"></div>
+  </div>
+
+  <!-- ============ 设置面板（配置版专用）============ -->
+  <div id="settingsPanel" class="reminder-panel hidden">
+    <div class="reminder-panel-header">
+      <span class="reminder-panel-title">⚙️ 设置</span>
+      <button class="reminder-panel-close" title="关闭">✕</button>
+    </div>
+    <div class="settings-form">
+      <div class="settings-banner" id="cfgBanner">
+        ⚠️ 首次使用请先配置大模型 API Key，否则无法使用聊天功能
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">🤖 大模型（OpenAI 兼容）</div>
+        <label class="settings-label">API Base URL</label>
+        <input type="text" id="cfgLlmBaseUrl" placeholder="https://api.openai.com/v1" />
+        <label class="settings-label">API Key</label>
+        <input type="password" id="cfgLlmApiKey" placeholder="sk-..." />
+        <label class="settings-label">模型名</label>
+        <input type="text" id="cfgLlmModel" placeholder="gpt-4o-mini" />
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">🔍 联网搜索（Tavily，可选）</div>
+        <label class="settings-label">Tavily API Key</label>
+        <input type="password" id="cfgTavilyKey" placeholder="tvly-..." />
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">📄 网页抓取（Jina Reader，可选）</div>
+        <label class="settings-label">Jina API Key</label>
+        <input type="password" id="cfgJinaKey" placeholder="jina_..." />
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">🌤️ 天气城市</div>
+        <label class="settings-label">城市名</label>
+        <input type="text" id="cfgWeatherCity" placeholder="南京" />
+      </div>
+      <div class="settings-save-row">
+        <span class="settings-hint" id="cfgHint"></span>
+        <button id="cfgSaveBtn" class="settings-save-btn">💾 保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 天气卡 ============ -->
+  <div id="weather" class="weather hidden">
+    <span class="weather-emoji">☀️</span>
+    <span class="weather-text">加载中…</span>
+    <button class="weather-refresh" title="刷新（跳过缓存）">🔄</button>
+  </div>
+
+  <!-- ============ 提醒举牌 ============ -->
+  <div id="sign" class="sign hidden">
+    <span class="sign-text"></span>
+  </div>
+
+  <!-- ============ 按依赖顺序加载模块 ============ -->
+  <script src="js/state.js"></script>
+  <script src="js/pet.js"></script>
+  <script src="js/markdown.js"></script>
+  <script src="js/interaction.js"></script>
+  <script src="js/movement.js"></script>
+  <script src="js/care.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/todo.js"></script>
+  <script src="js/weather.js"></script>
+  <script src="js/fileops.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/renderer.js"></script>
+</body>
+</html>

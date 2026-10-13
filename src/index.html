@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小橘猫缘缘</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <!-- ============ 宠物主体 ============ -->
+  <div id="pet-container">
+    <div id="pet" class="cat" data-mood="normal">      <svg viewBox="0 0 200 220" width="160" height="176" id="cat-svg">
+        <!-- 影子（呼吸时缩放） -->
+        <ellipse class="shadow" cx="100" cy="212" rx="52" ry="7" />
+
+        <!-- 尾巴（摇摆动画） -->
+        <g class="cat-tail" style="transform-origin: 140px 160px;">
+          <path class="tail-path" d="M140 162 Q178 150 176 108 Q176 88 160 88"
+                stroke="#F5A623" stroke-width="22" fill="none" stroke-linecap="round" />
+          <path class="tail-stripe" d="M168 150 Q173 138 172 126"
+                stroke="#E8852A" stroke-width="4.5" fill="none" stroke-linecap="round" />
+        </g>
+
+        <!-- 身体 -->
+        <g class="cat-body">
+          <ellipse cx="100" cy="158" rx="50" ry="46" fill="#F5A623" />
+          <!-- 白色肚子 -->
+          <ellipse cx="100" cy="168" rx="29" ry="33" fill="#FFF4E6" />
+          <!-- 身体条纹 -->
+          <path d="M56 138 Q62 132 68 140" stroke="#E8852A" stroke-width="4" fill="none" stroke-linecap="round" />
+          <path d="M132 140 Q138 132 144 138" stroke="#E8852A" stroke-width="4" fill="none" stroke-linecap="round" />
+          <!-- 前腿（分组，可单独动画） -->
+          <g class="leg leg-left">
+            <ellipse cx="80" cy="192" rx="15" ry="13" fill="#F5A623" />
+            <ellipse cx="80" cy="194" rx="10" ry="7" fill="#FFF4E6" />
+          </g>
+          <g class="leg leg-right">
+            <ellipse cx="120" cy="192" rx="15" ry="13" fill="#F5A623" />
+            <ellipse cx="120" cy="194" rx="10" ry="7" fill="#FFF4E6" />
+          </g>
+        </g>
+
+        <!-- 头部（呼吸缩放） -->
+        <g class="cat-head" style="transform-origin: 100px 100px;">
+          <!-- 耳朵 -->
+          <g class="ear left-ear">
+            <path d="M56 72 L48 30 L84 60 Z" fill="#F5A623" />
+            <path d="M60 66 L54 42 L76 58 Z" fill="#FFB6C1" />
+          </g>
+          <g class="ear right-ear">
+            <path d="M144 72 L152 30 L116 60 Z" fill="#F5A623" />
+            <path d="M140 66 L146 42 L124 58 Z" fill="#FFB6C1" />
+          </g>
+
+          <!-- 脸 -->
+          <ellipse cx="100" cy="88" rx="50" ry="46" fill="#F5A623" />
+          <!-- 头部条纹 -->
+          <path d="M100 44 L100 56" stroke="#E8852A" stroke-width="4" fill="none" stroke-linecap="round" />
+          <path d="M76 50 Q80 56 76 62" stroke="#E8852A" stroke-width="3.5" fill="none" stroke-linecap="round" />
+          <path d="M124 50 Q120 56 124 62" stroke="#E8852A" stroke-width="3.5" fill="none" stroke-linecap="round" />
+
+          <!-- 脸下部白色 -->
+          <ellipse cx="100" cy="102" rx="31" ry="26" fill="#FFF4E6" />
+
+          <!-- 腮红 -->
+          <ellipse class="blush" cx="70" cy="100" rx="9" ry="5.5" fill="#FF9DAE" opacity="0.7" />
+          <ellipse class="blush" cx="130" cy="100" rx="9" ry="5.5" fill="#FF9DAE" opacity="0.7" />
+
+          <!-- 眼睛：普通（圆眼，会眨眼） -->
+          <g class="eye-normal">
+            <g class="eye left-eye">
+              <ellipse class="eye-shape" cx="82" cy="84" rx="9.5" ry="12.5" fill="#2B2B2B" />
+              <ellipse class="eye-shine" cx="85" cy="79" rx="3.2" ry="4.5" fill="#FFFFFF" />
+              <ellipse class="eye-shine2" cx="79" cy="90" rx="1.4" ry="2" fill="#FFFFFF" opacity="0.6" />
+            </g>
+            <g class="eye right-eye">
+              <ellipse class="eye-shape" cx="118" cy="84" rx="9.5" ry="12.5" fill="#2B2B2B" />
+              <ellipse class="eye-shine" cx="121" cy="79" rx="3.2" ry="4.5" fill="#FFFFFF" />
+              <ellipse class="eye-shine2" cx="115" cy="90" rx="1.4" ry="2" fill="#FFFFFF" opacity="0.6" />
+            </g>
+          </g>
+
+          <!-- 眼睛：开心（^_^ 弧线） -->
+          <g class="eye-happy">
+            <path d="M73 86 Q82 76 91 86" stroke="#2B2B2B" stroke-width="3.5" fill="none" stroke-linecap="round" />
+            <path d="M109 86 Q118 76 127 86" stroke="#2B2B2B" stroke-width="3.5" fill="none" stroke-linecap="round" />
+          </g>
+
+          <!-- 眼睛：困（-_- 横线） -->
+          <g class="eye-sleepy">
+            <path d="M73 84 L91 84" stroke="#2B2B2B" stroke-width="3.5" fill="none" stroke-linecap="round" />
+            <path d="M109 84 L127 84" stroke="#2B2B2B" stroke-width="3.5" fill="none" stroke-linecap="round" />
+          </g>
+
+          <!-- 眼睛：惊讶（O O 大圆） -->
+          <g class="eye-surprised">
+            <ellipse cx="82" cy="84" rx="6" ry="8" fill="#2B2B2B" />
+            <ellipse cx="118" cy="84" rx="6" ry="8" fill="#2B2B2B" />
+          </g>
+
+          <!-- 鼻子 -->
+          <path d="M96 104 L104 104 L100 109 Z" fill="#FF9DAE" />
+          <!-- 嘴：默认笑嘴 -->
+          <path class="mouth mouth-smile" d="M100 109 Q100 115 93 115 M100 109 Q100 115 107 115"
+                stroke="#7a4a1e" stroke-width="2" fill="none" stroke-linecap="round" />
+          <!-- 嘴：吃东西 -->
+          <path class="mouth mouth-eat" d="M92 112 Q100 120 108 112 Z" fill="#7a4a1e" />
+          <!-- 嘴：哭/难过 -->
+          <path class="mouth mouth-sad" d="M93 116 Q100 110 107 116" stroke="#7a4a1e" stroke-width="2" fill="none" stroke-linecap="round" />
+          <!-- 流口水（饿了） -->
+          <ellipse class="drool" cx="100" cy="118" rx="3" ry="6" fill="#9ad9ff" />
+
+          <!-- 胡须 -->
+          <g class="whiskers" stroke="#9a6a3e" stroke-width="1.3" fill="none" stroke-linecap="round">
+            <path d="M64 100 L42 96" />
+            <path d="M64 106 L42 108" />
+            <path d="M136 100 L158 96" />
+            <path d="M136 106 L158 108" />
+          </g>
+
+          <!-- Zzz 睡觉符号 -->
+          <g class="zzz">
+            <text x="146" y="46" font-size="16" fill="#8aa0ff" font-weight="bold">z</text>
+            <text x="156" y="34" font-size="13" fill="#8aa0ff" font-weight="bold">z</text>
+            <text x="164" y="24" font-size="10" fill="#8aa0ff" font-weight="bold">z</text>
+          </g>
+
+          <!-- 墨镜（唱歌时戴） -->
+          <g class="sunglasses">
+            <!-- 左镜片 -->
+            <rect x="64" y="76" width="24" height="18" rx="6" fill="#1a1a2e" stroke="#333" stroke-width="1.5" />
+            <!-- 右镜片 -->
+            <rect x="112" y="76" width="24" height="18" rx="6" fill="#1a1a2e" stroke="#333" stroke-width="1.5" />
+            <!-- 鼻梁 -->
+            <rect x="88" y="81" width="24" height="4" rx="2" fill="#333" />
+            <!-- 反光 -->
+            <ellipse cx="72" cy="82" rx="5" ry="3" fill="#4a6aaa" opacity="0.6" />
+            <ellipse cx="120" cy="82" rx="5" ry="3" fill="#4a6aaa" opacity="0.6" />
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <!-- ============ 床（睡觉时显示） ============ -->
+    <div id="bed" class="bed hidden">
+      <svg viewBox="0 0 200 80" width="200" height="80">
+        <!-- 床腿 -->
+        <rect x="14" y="56" width="10" height="20" rx="3" fill="#b8865a" />
+        <rect x="176" y="56" width="10" height="20" rx="3" fill="#b8865a" />
+        <!-- 床框 -->
+        <rect x="8" y="44" width="184" height="16" rx="6" fill="#c9925e" />
+        <rect x="8" y="44" width="184" height="6" rx="3" fill="#d9a874" />
+        <!-- 床垫 -->
+        <rect x="16" y="34" width="168" height="14" rx="5" fill="#fff4e6" />
+        <!-- 枕头 -->
+        <ellipse cx="44" cy="32" rx="20" ry="9" fill="#ffe8d0" />
+        <ellipse cx="44" cy="30" rx="18" ry="7" fill="#fff4e6" />
+        <!-- 被子褶皱 -->
+        <path d="M70 36 Q100 32 130 36 Q150 38 168 36" stroke="#ffd9a8" stroke-width="2.5" fill="none" stroke-linecap="round" />
+        <path d="M80 42 Q110 39 140 42" stroke="#ffd9a8" stroke-width="2" fill="none" stroke-linecap="round" />
+      </svg>
+    </div>
+    <!-- 吉他（唱歌时出现） -->
+    <div id="guitar" class="guitar hidden">
+      <svg viewBox="0 0 80 100" width="64" height="80">
+        <!-- 琴头 -->
+        <rect x="33" y="0" width="14" height="10" rx="2" fill="#5a3a1a" />
+        <!-- 琴颈 -->
+        <rect x="36" y="8" width="8" height="38" fill="#8a5a2a" />
+        <!-- 琴弦 -->
+        <line x1="38" y1="8" x2="38" y2="46" stroke="#ddd" stroke-width="0.6" />
+        <line x1="40" y1="8" x2="40" y2="46" stroke="#ddd" stroke-width="0.6" />
+        <line x1="42" y1="8" x2="42" y2="46" stroke="#ddd" stroke-width="0.6" />
+        <!-- 共鸣箱 -->
+        <ellipse cx="40" cy="66" rx="26" ry="28" fill="#d4a050" />
+        <ellipse cx="40" cy="66" rx="22" ry="24" fill="#e8b860" />
+        <!-- 音孔 -->
+        <circle cx="40" cy="62" r="9" fill="#3a2a1a" />
+        <!-- 琴桥 -->
+        <rect x="30" y="76" width="20" height="4" rx="2" fill="#5a3a1a" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- ============ 对话气泡 ============ -->
+  <div id="bubble" class="bubble hidden">
+    <span class="bubble-text"></span>
+    <div class="bubble-tail"></div>
+  </div>
+
+  <!-- ============ 喂食菜单 ============ -->
+  <div id="menu" class="menu hidden"></div>
+
+  <!-- ============ AI 对话框 ============ -->
+  <div id="chatbox" class="chatbox hidden">
+    <div class="chatbox-header">
+      <span class="chatbox-title">🐱 和小橘聊天</span>
+      <div class="chatbox-header-btns">
+        <!-- 头部只留通用符号（⤢ ··· — ✕），不靠 tooltip 也能用；
+             低频/危险操作收进溢出菜单，别和高频按钮抢视觉权重 -->
+        <button class="chatbox-header-btn" id="chatExpandBtn" title="最大化窗口">🗖</button>
+        <button class="chatbox-header-btn" id="chatMoreBtn" title="更多操作" aria-haspopup="menu">···</button>
+        <button class="chatbox-close" title="收起聊天框（小橘留在桌面，双击它可再打开）">✕</button>
+
+        <div class="chat-more-menu hidden" id="chatMoreMenu" role="menu">
+          <button class="chat-more-item" id="chatHistoryBtn" role="menuitem">📜 聊天记录</button>
+          <button class="chat-more-item" id="chatExportBtn" role="menuitem">📤 导出对话</button>
+          <div class="chat-more-sep"></div>
+          <button class="chat-more-item" id="chatClearBtn" role="menuitem">🧹 清屏</button>
+          <button class="chat-more-item danger" id="chatClearHistoryBtn" role="menuitem">🗑 清除聊天历史</button>
+        </div>
+      </div>
+    </div>
+    <div class="chatbox-messages" id="chatMessages">
+      <div class="chat-empty-state" id="chatEmptyState">
+        <div class="empty-icon">🐱</div>
+        <div class="empty-title">和小橘聊点什么吧～</div>
+        <div class="empty-hint">我会写代码、操作电脑、生成文档、定时追踪、自我进化…远不止聊天</div>
+        <div class="empty-tags">
+          <span class="empty-tag"><span class="tag-emoji">🐍</span>写代码</span>
+          <span class="empty-tag"><span class="tag-emoji">📄</span>生成文档</span>
+          <span class="empty-tag"><span class="tag-emoji">🔌</span>MCP工具</span>
+          <span class="empty-tag"><span class="tag-emoji">💻</span>操作电脑</span>
+          <span class="empty-tag"><span class="tag-emoji">🔄</span>定时任务</span>
+          <span class="empty-tag"><span class="tag-emoji">🔍</span>联网搜索</span>
+          <span class="empty-tag"><span class="tag-emoji">🧠</span>AI推理</span>
+          <span class="empty-tag"><span class="tag-emoji">🌱</span>自我进化</span>
+        </div>
+      </div>
+    </div>
+    <div class="chatbox-toolbar" id="chatToolbar">
+      <button class="chat-tool-btn" id="chatUploadImageBtn" title="上传图片"><span>🖼️</span><span class="tool-label">图片</span></button>
+      <button class="chat-tool-btn" id="chatUploadFileBtn" title="上传文件（读取内容分析）"><span>📄</span><span class="tool-label">文件</span></button>
+      <button class="chat-tool-btn" id="chatKbBtn" title="查询 IMA 知识库"><span>📚</span><span class="tool-label">知识库</span></button>
+      <input type="file" id="chatImageInput" accept="image/*" style="display:none;" />
+      <input type="file" id="chatDocInput" style="display:none;" />
+      <div class="chat-preview-strip" id="chatPreviewStrip"></div>
+    </div>
+    <div class="chatbox-input">
+      <textarea id="chatInput" placeholder="对小橘说点什么…" rows="1"></textarea>
+      <button id="chatSend" title="发送">发送</button>
+    </div>
+  </div>
+
+  <!-- ============ 通用确认弹窗 ============ -->
+  <div id="confirmModal" class="confirm-modal hidden">
+    <div class="confirm-box">
+      <div class="confirm-title" id="confirmTitle"></div>
+      <div class="confirm-msg" id="confirmMsg"></div>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-cancel" id="confirmCancel">取消</button>
+        <button class="confirm-btn confirm-ok" id="confirmOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 图片放大预览（单击缩略图打开） ============ -->
+  <div id="imgLightbox" class="confirm-modal hidden">
+    <div class="lightbox-box">
+      <div class="lightbox-title" id="lightboxTitle">图片预览</div>
+      <div class="lightbox-stage"><img id="lightboxImg" alt="图片预览" /></div>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-ok" id="lightboxOpen">🗂 用系统程序打开</button>
+        <button class="confirm-btn confirm-cancel" id="lightboxClose">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 通用选择弹窗（AI 不确定时给选项） ============ -->
+  <div id="choiceModal" class="confirm-modal hidden">
+    <div class="confirm-box">
+      <div class="confirm-title" id="choiceTitle"></div>
+      <div class="confirm-msg" id="choiceMsg"></div>
+      <div class="choice-list" id="choiceList"></div>
+      <div class="choice-custom" id="choiceCustomWrap" style="display:none;">
+        <input type="text" id="choiceCustomInput" class="choice-custom-input" placeholder="输入你的自定义要求…" />
+        <button class="choice-custom-btn" id="choiceCustomBtn">确定</button>
+      </div>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-cancel" id="choiceCancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 待办面板 ============ -->
+  <div id="todopanel" class="todopanel hidden">
+    <div class="todopanel-header">
+      <span class="todopanel-title">📋 待办事项</span>
+      <button class="todopanel-close" title="关闭">✕</button>
+    </div>
+    <div class="todopanel-add">
+      <input type="text" id="todoInput" placeholder="输入待办内容…" maxlength="60" />
+      <div class="todopanel-row">
+        <input type="datetime-local" id="todoTime" />
+        <button id="todoAdd" title="添加">＋ 添加</button>
+      </div>
+    </div>
+    <div class="todopanel-list" id="todoList"></div>
+  </div>
+
+  <!-- ============ 文件选择确认面板 ============ -->
+  <div id="filepanel" class="filepanel hidden">
+    <div class="filepanel-header">
+      <span class="filepanel-title">📂 选择文件</span>
+      <button class="filepanel-close" title="取消">✕</button>
+    </div>
+    <div class="filepanel-desc" id="filepanelDesc"></div>
+    <div class="filepanel-list" id="filepanelList"></div>
+    <div class="filepanel-actions">
+      <button class="filepanel-confirm" id="filepanelConfirm" disabled>确认</button>
+      <button class="filepanel-cancel" id="filepanelCancel">取消</button>
+    </div>
+  </div>
+
+  <!-- ============ 循环提醒管理面板 ============ -->
+  <div id="reminderPanel" class="reminder-panel hidden">
+    <div class="reminder-panel-header">
+      <span class="reminder-panel-title">⏰ 提醒管理</span>
+      <button class="reminder-panel-close" title="关闭">✕</button>
+    </div>
+    <div class="reminder-panel-add">
+      <input type="text" id="reminderInput" placeholder="提醒内容，如：喝水、开会、交周报…" maxlength="60" />
+      <div class="reminder-type-tabs">
+        <button class="reminder-tab active" data-type="interval">间隔重复</button>
+        <button class="reminder-tab" data-type="weekly">定时重复</button>
+      </div>
+      <!-- 间隔模式 -->
+      <div class="reminder-panel-row reminder-mode reminder-mode-interval">
+        <label>间隔</label>
+        <input type="number" id="reminderInterval" value="30" min="1" max="1440" />
+        <select id="reminderUnit">
+          <option value="minutes">分钟</option>
+          <option value="hours">小时</option>
+        </select>
+        <button id="reminderAdd">＋ 添加</button>
+      </div>
+      <!-- 定时模式 -->
+      <div class="reminder-panel-row reminder-mode reminder-mode-weekly" style="display:none;">
+        <label>时间</label>
+        <input type="time" id="reminderTime" value="09:00" />
+        <div class="reminder-weekdays">
+          <label class="weekday-toggle"><input type="checkbox" value="1"><span>一</span></label>
+          <label class="weekday-toggle"><input type="checkbox" value="2"><span>二</span></label>
+          <label class="weekday-toggle"><input type="checkbox" value="3"><span>三</span></label>
+          <label class="weekday-toggle"><input type="checkbox" value="4"><span>四</span></label>
+          <label class="weekday-toggle"><input type="checkbox" value="5"><span>五</span></label>
+          <label class="weekday-toggle"><input type="checkbox" value="6"><span>六</span></label>
+          <label class="weekday-toggle"><input type="checkbox" value="0"><span>日</span></label>
+        </div>
+        <button id="reminderAddWeekly">＋ 添加</button>
+      </div>
+    </div>
+    <div class="reminder-panel-list" id="reminderList"></div>
+  </div>
+
+  <!-- ============ 定时任务管理面板 ============ -->
+  <div id="scheduledPanel" class="scheduled-panel hidden">
+    <div class="scheduled-panel-header">
+      <span class="scheduled-panel-title">🔄 定时任务</span>
+      <button class="scheduled-panel-close" title="关闭">✕</button>
+    </div>
+    <div class="scheduled-panel-body">
+      <!-- 创建任务区 -->
+      <details class="scheduled-create" id="scheduledCreate">
+        <summary class="scheduled-create-title">➕ 创建定时任务</summary>
+        <div class="scheduled-form">
+          <div class="scheduled-form-row">
+            <label>任务名称</label>
+            <input type="text" id="schedName" placeholder="如：每日数据抓取" maxlength="30" />
+          </div>
+          <div class="scheduled-form-row">
+            <label>任务描述</label>
+            <input type="text" id="schedPrompt" placeholder="如：抓取XX网站数据生成日报" />
+          </div>
+          <div class="scheduled-form-row">
+            <label>调度类型</label>
+            <div class="sched-type-tabs">
+              <button class="sched-tab active" data-type="daily">每天</button>
+              <button class="sched-tab" data-type="interval">间隔</button>
+              <button class="sched-tab" data-type="weekly">每周</button>
+            </div>
+          </div>
+          <div class="sched-mode sched-mode-daily">
+            <div class="scheduled-form-row">
+              <label>执行时间</label>
+              <input type="time" id="schedTime" value="08:00" />
+            </div>
+          </div>
+          <div class="sched-mode sched-mode-interval" style="display:none;">
+            <div class="scheduled-form-row">
+              <label>间隔</label>
+              <input type="number" id="schedInterval" value="30" min="1" max="1440" />
+              <select id="schedIntervalUnit">
+                <option value="m">分钟</option>
+                <option value="h">小时</option>
+              </select>
+            </div>
+          </div>
+          <div class="sched-mode sched-mode-weekly" style="display:none;">
+            <div class="scheduled-form-row">
+              <label>执行时间</label>
+              <input type="time" id="schedWeeklyTime" value="09:00" />
+            </div>
+            <div class="scheduled-form-row">
+              <label>星期</label>
+              <div class="sched-weekdays">
+                <label class="weekday-toggle"><input type="checkbox" value="1"><span>一</span></label>
+                <label class="weekday-toggle"><input type="checkbox" value="2"><span>二</span></label>
+                <label class="weekday-toggle"><input type="checkbox" value="3"><span>三</span></label>
+                <label class="weekday-toggle"><input type="checkbox" value="4"><span>四</span></label>
+                <label class="weekday-toggle"><input type="checkbox" value="5"><span>五</span></label>
+                <label class="weekday-toggle"><input type="checkbox" value="6"><span>六</span></label>
+                <label class="weekday-toggle"><input type="checkbox" value="0"><span>日</span></label>
+              </div>
+            </div>
+          </div>
+          <div class="scheduled-form-row">
+            <label>脚本语言</label>
+            <select id="schedLang">
+              <option value="python">Python</option>
+              <option value="powershell">PowerShell</option>
+            </select>
+          </div>
+          <div class="scheduled-form-row">
+            <label>脚本代码</label>
+            <textarea id="schedCode" placeholder="在这里贴入已调通的代码，或留空让AI自动生成&#10;（也可以直接跟小橘说：创建定时任务，每天8点…）"></textarea>
+          </div>
+          <div class="scheduled-create-actions">
+            <button id="schedCreateBtn" class="sched-btn-primary">➕ 创建任务</button>
+            <button id="schedCreateAIBtn" class="sched-btn-secondary">🤖 让小橘帮你生成</button>
+          </div>
+        </div>
+      </details>
+      <!-- 任务列表区 -->
+      <div class="scheduled-list-section">
+        <div class="scheduled-list-title">📋 已有任务</div>
+        <div class="scheduled-panel-list" id="scheduledList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 天气卡 ============ -->
+  <div id="weather" class="weather hidden">
+    <div class="weather-main">
+      <span class="weather-emoji">☀️</span>
+      <div class="weather-info">
+        <div class="weather-text">加载中…</div>
+      </div>
+    </div>
+    <div class="weather-actions">
+      <button class="weather-config" title="配置地区">⚙️</button>
+      <button class="weather-refresh" title="刷新（跳过缓存）">🔄</button>
+    </div>
+  </div>
+
+  <!-- ============ 提醒举牌 ============ -->
+  <div id="sign" class="sign hidden">
+    <span class="sign-text"></span>
+  </div>
+
+  <!-- ============ Skills 技能面板 ============ -->
+  <div id="skillsPanel" class="skills-panel hidden">
+    <div class="skills-panel-header">
+      <span class="skills-panel-title">🧩 技能管理</span>
+      <button class="skills-panel-close" title="关闭">✕</button>
+    </div>
+    <div class="skills-tabs">
+      <button class="skills-tab active" data-tab="installed">已安装</button>
+      <button class="skills-tab" data-tab="add">添加</button>
+      <button class="skills-tab" data-tab="hub">技能商店</button>
+    </div>
+    <!-- 已安装 -->
+    <div class="skills-tab-content skills-tab-installed active">
+      <div class="skills-list" id="skillsList"></div>
+    </div>
+    <!-- 添加 -->
+    <div class="skills-tab-content skills-tab-add">
+      <div class="skills-add-section">
+        <div class="skills-add-title">📦 导入 ZIP 技能包</div>
+        <button class="skills-btn" id="skillsImportZipBtn">选择 ZIP 文件…</button>
+        <input type="file" id="skillsZipInput" accept=".zip" style="display:none;" />
+      </div>
+      <div class="skills-add-section">
+        <div class="skills-add-title">✍️ 手动输入 SKILL.md</div>
+        <textarea id="skillsManualInput" class="skills-textarea" placeholder="---
+name: data-analysis
+description: 专业数据分析，当用户提到分析CSV/Excel、趋势分析时触发。
+version: 1.0.0
+author: duansihang
+---
+
+# 数据分析专家
+
+你现在是数据分析专家，当用户需要分析数据时，按以下步骤…"></textarea>
+        <button class="skills-btn" id="skillsManualAddBtn">添加技能</button>
+      </div>
+    </div>
+    <!-- 技能商店 -->
+    <div class="skills-tab-content skills-tab-hub">
+      <div class="skills-hub-search">
+        <input type="text" id="skillsHubSearch" placeholder="搜索技能，如：数据分析、周报、代码审查…" />
+        <button id="skillsHubSearchBtn">🔍</button>
+      </div>
+      <div class="skills-hub-hint">从 SkillHub 技能商店一键安装（15万+开源技能）</div>
+      <div class="skills-list" id="skillsHubList"></div>
+    </div>
+  </div>
+
+  <!-- ============ MCP 工具面板 ============ -->
+  <div id="mcpPanel" class="mcp-panel hidden">
+    <div class="mcp-panel-header">
+      <span class="mcp-panel-title">🔌 MCP 工具对接</span>
+      <button class="mcp-panel-close" id="mcpPanelClose" title="关闭">✕</button>
+    </div>
+    <div style="padding: 12px 16px; overflow-y: auto; max-height: 70vh;">
+      <div class="settings-hint" style="margin-bottom: 8px;">配置 MCP Server 后，小橘可以调用外部工具（支持 SSE 和 Streamable HTTP）</div>
+      <!-- 导入魔搭/Claude Desktop JSON -->
+      <div class="mcp-import-section">
+        <div class="mcp-import-title">📋 粘贴 MCP 配置 JSON（魔搭/Claude Desktop 格式）</div>
+        <textarea id="mcpImportInput" class="skills-textarea" style="height:60px;" placeholder='{"mcpServers":{"bing-cn-mcp-server":{"type":"streamable_http","url":"https://mcp.api-inference.modelscope.net/xxx/mcp"}}}'></textarea>
+        <button class="settings-btn" id="mcpImportBtn" style="margin-top:4px;">📥 导入并连接</button>
+      </div>
+      <div id="mcpServersList"></div>
+      <div class="email-actions" style="margin-top: 8px;">
+        <button class="settings-btn" id="mcpAddBtn">➕ 添加 MCP Server</button>
+        <button class="settings-btn" id="mcpConnectBtn">🔗 连接全部</button>
+      </div>
+      <div class="settings-status" id="mcpStatus"></div>
+      <div id="mcpToolsList"></div>
+    </div>
+  </div>
+
+  <!-- ============ IMA 知识库面板 ============ -->
+  <div id="imaPanel" class="ima-panel hidden">
+    <div class="ima-panel-header">
+      <span class="ima-panel-title">📚 IMA 知识库</span>
+      <button class="ima-panel-close" title="关闭">✕</button>
+    </div>
+    <div class="ima-tabs">
+      <button class="ima-tab active" data-tab="config">配置</button>
+      <button class="ima-tab" data-tab="search">搜索</button>
+    </div>
+    <!-- 配置 -->
+    <div class="ima-tab-content ima-tab-config active">
+      <div class="ima-config-section">
+        <label class="ima-label">Client ID</label>
+        <input type="text" id="imaClientId" class="ima-input" placeholder="IMA OpenAPI Client ID" />
+      </div>
+      <div class="ima-config-section">
+        <label class="ima-label">API Key</label>
+        <input type="password" id="imaApiKey" class="ima-input" placeholder="IMA OpenAPI API Key" />
+      </div>
+      <div class="ima-config-section">
+        <label class="ima-label">知识库 ID（可选，搜索时选择）</label>
+        <input type="text" id="imaKbId" class="ima-input" placeholder="留空则搜索时选择知识库" />
+      </div>
+      <div class="ima-config-actions">
+        <button class="ima-btn" id="imaTestBtn">测试连接</button>
+        <button class="ima-btn ima-btn-primary" id="imaSaveBtn">保存配置</button>
+      </div>
+      <div class="ima-status" id="imaStatus"></div>
+    </div>
+    <!-- 搜索 -->
+    <div class="ima-tab-content ima-tab-search">
+      <div class="ima-search-box">
+        <input type="text" id="imaSearchInput" placeholder="搜索知识库内容…" />
+        <button class="ima-btn" id="imaSearchBtn">🔍</button>
+      </div>
+      <div class="ima-kb-select" id="imaKbSelect"></div>
+      <div class="ima-results" id="imaResults"></div>
+    </div>
+  </div>
+
+  <!-- ============ 设置面板 ============ -->
+  <div id="settingsPanel" class="settings-panel hidden">
+    <div class="settings-panel-header">
+      <span class="settings-panel-title">⚙️ 设置</span>
+      <button class="settings-panel-close" title="关闭">✕</button>
+    </div>
+    <div class="settings-content">
+      <!-- 折叠区：头像设置 -->
+      <div class="settings-collapse">
+        <div class="settings-collapse-header" id="avatarCollapseHeader">
+          <span class="settings-collapse-icon">🧑</span>
+          <span class="settings-collapse-title">头像设置</span>
+          <span class="settings-collapse-arrow">▶</span>
+        </div>
+        <div class="settings-collapse-body" id="avatarCollapseBody">
+          <div class="avatar-section">
+            <label class="avatar-label">🐱 小橘头像</label>
+            <div class="avatar-picker">
+              <div class="avatar-preview" id="petAvatarPreview">🐱</div>
+              <div class="avatar-actions">
+                <button class="avatar-btn" id="petAvatarUploadBtn">📁 上传图片</button>
+                <button class="avatar-btn avatar-btn-reset" id="petAvatarResetBtn">↺ 恢复默认</button>
+              </div>
+              <input type="file" id="petAvatarInput" accept="image/*" style="display:none;" />
+            </div>
+            <div class="avatar-hint">支持 JPG/PNG/GIF/WebP，不超过 10MB</div>
+          </div>
+          <div class="avatar-section">
+            <label class="avatar-label">🧑 我的头像</label>
+            <div class="avatar-picker">
+              <div class="avatar-preview" id="userAvatarPreview">我</div>
+              <div class="avatar-actions">
+                <button class="avatar-btn" id="userAvatarUploadBtn">📁 上传图片</button>
+                <button class="avatar-btn avatar-btn-reset" id="userAvatarResetBtn">↺ 恢复默认</button>
+              </div>
+              <input type="file" id="userAvatarInput" accept="image/*" style="display:none;" />
+            </div>
+            <div class="avatar-hint">支持 JPG/PNG/GIF/WebP，不超过 10MB</div>
+          </div>
+          <div class="avatar-status" id="avatarStatus"></div>
+        </div>
+      </div>
+      <!-- 折叠区：文件路径 -->
+      <div class="settings-collapse">
+        <div class="settings-collapse-header" id="pathCollapseHeader">
+          <span class="settings-collapse-icon">📁</span>
+          <span class="settings-collapse-title">文件输出路径</span>
+          <span class="settings-collapse-arrow">▶</span>
+        </div>
+        <div class="settings-collapse-body" id="pathCollapseBody">
+          <div class="settings-save-dir">
+            <input type="text" id="settingsSaveDir" class="settings-input" readonly placeholder="未设置（默认桌面）" />
+            <button class="settings-btn" id="settingsChooseDirBtn">选择…</button>
+          </div>
+          <div class="settings-hint">小橘生成的文件（截图、HTML 网页、Markdown 下载）都会保存到这里</div>
+          <div class="settings-status" id="settingsStatus"></div>
+        </div>
+      </div>
+      <!-- 折叠区：小橘的记忆（用户画像） -->
+      <div class="settings-collapse">
+        <div class="settings-collapse-header" id="memoryCollapseHeader">
+          <span class="settings-collapse-icon">🧠</span>
+          <span class="settings-collapse-title">小橘的记忆</span>
+          <span class="settings-collapse-arrow">▶</span>
+        </div>
+        <div class="settings-collapse-body" id="memoryCollapseBody">
+          <div class="settings-hint" style="margin-bottom: 8px;">小橘在聊天中自动记住的关于你的信息，可以编辑或删除</div>
+          <div id="memoryList" class="memory-list"></div>
+          <div class="memory-add-row">
+            <input type="text" id="memoryAddInput" class="settings-input" placeholder="手动添加一条记忆…" />
+            <button class="settings-btn" id="memoryAddBtn">＋ 添加</button>
+          </div>
+          <button class="settings-btn memory-clear-btn" id="memoryClearBtn">🗑️ 清空所有记忆</button>
+        </div>
+      </div>
+      <!-- 折叠区：邮箱集成 -->
+      <div class="settings-collapse">
+        <div class="settings-collapse-header" id="emailCollapseHeader">
+          <span class="settings-collapse-icon">📧</span>
+          <span class="settings-collapse-title">邮箱集成</span>
+          <span class="settings-collapse-arrow">▶</span>
+        </div>
+        <div class="settings-collapse-body" id="emailCollapseBody">
+          <div class="settings-hint" style="margin-bottom: 8px;">配置邮箱后，可以直接跟小橘说"发邮件给XX""查收件箱"</div>
+          <div class="email-form">
+            <div class="email-form-row">
+              <label>邮箱地址</label>
+              <input type="text" id="emailAddr" class="settings-input" placeholder="如：xxx@163.com" />
+              <span class="email-preset-badge" id="emailPresetBadge"></span>
+            </div>
+            <div class="email-form-row">
+              <label>授权码/密码</label>
+              <input type="password" id="emailPwd" class="settings-input" placeholder="邮箱授权码（非登录密码）" />
+            </div>
+            <div class="email-server-hint" id="emailServerHint"></div>
+            <div class="email-actions">
+              <button class="settings-btn" id="emailSaveBtn">💾 保存</button>
+              <button class="settings-btn" id="emailTestBtn">📨 测试发信</button>
+            </div>
+            <div class="settings-status" id="emailStatus"></div>
+            <div class="email-contacts" id="emailContactsList"></div>
+          </div>
+        </div>
+      </div>
+      <!-- 折叠区：语音朗读（TTS） -->
+      <div class="settings-collapse">
+        <div class="settings-collapse-header" id="ttsCollapseHeader">
+          <span class="settings-collapse-icon">🔊</span>
+          <span class="settings-collapse-title">语音朗读</span>
+          <span class="settings-collapse-arrow">▶</span>
+        </div>
+        <div class="settings-collapse-body" id="ttsCollapseBody">
+          <div class="settings-hint" style="margin-bottom: 8px;">选择朗读音色，聊天回复下的 🔊 朗读按钮会用这个音色</div>
+          <div class="email-form">
+            <div class="email-form-row">
+              <label>朗读音色</label>
+              <select id="ttsVoiceSelect" class="settings-input"></select>
+            </div>
+            <div class="email-form-row">
+              <label>自动播报</label>
+              <div class="tts-auto-wrap">
+                <label class="toggle-switch" for="ttsAutoRead" title="点击开启/关闭">
+                  <input type="checkbox" id="ttsAutoRead" />
+                  <span class="toggle-track"><span class="toggle-knob"></span></span>
+                </label>
+                <span class="toggle-state-text" id="ttsAutoReadText">已关闭</span>
+                <span class="toggle-hint">开启后，小橘回复时会自动语音播报</span>
+              </div>
+            </div>
+            <div class="email-actions">
+              <button class="settings-btn" id="ttsPreviewBtn">▶️ 试听</button>
+              <button class="settings-btn" id="ttsSaveBtn">💾 保存</button>
+            </div>
+            <div class="settings-status" id="ttsStatus"></div>
+          </div>
+        </div>
+      </div>
+      <!-- 折叠区：思考模式 -->
+      <div class="settings-collapse">
+        <div class="settings-collapse-header" id="thinkingCollapseHeader">
+          <span class="settings-collapse-icon">🧠</span>
+          <span class="settings-collapse-title">思考模式</span>
+          <span class="settings-collapse-arrow">▶</span>
+        </div>
+        <div class="settings-collapse-body" id="thinkingCollapseBody">
+          <div class="settings-hint" style="margin-bottom: 8px;">控制 AI 回答前是否"深度思考"。思考提升推理质量，但响应会慢 5~10 秒；日常问答建议"关闭"或"自动"</div>
+          <div class="email-form">
+            <div class="email-form-row">
+              <label>思考模式</label>
+              <select id="thinkingModeSelect" class="settings-input">
+                <option value="off">关闭（最快，推荐）</option>
+                <option value="auto">自动（复杂任务才思考）</option>
+                <option value="on">开启（每次都思考，最慢）</option>
+              </select>
+            </div>
+            <div class="email-form-row">
+              <label>思考强度</label>
+              <select id="thinkingEffortSelect" class="settings-input">
+                <option value="low">低（思考简短）</option>
+                <option value="medium">中</option>
+                <option value="high">高（深入推演）</option>
+              </select>
+            </div>
+            <div class="email-actions">
+              <button class="settings-btn" id="thinkingSaveBtn">💾 保存</button>
+            </div>
+            <div class="settings-status" id="thinkingStatus"></div>
+            <div class="settings-hint">说明：MiMo 接口的思考只有开/关两档（无 low/high 参数），"思考强度"通过提示词控制思考长度。开启思考后，思考过程会显示在聊天里的可折叠"思考过程"块中。</div>
+          </div>
+        </div>
+      </div>
+      <!-- 折叠区：关于小橘 -->
+      <div class="settings-collapse">
+        <div class="settings-collapse-header" id="aboutCollapseHeader">
+          <span class="settings-collapse-icon">🐾</span>
+          <span class="settings-collapse-title">关于小橘</span>
+          <span class="settings-collapse-arrow">▶</span>
+        </div>
+        <div class="settings-collapse-body" id="aboutCollapseBody">
+          <div class="about-content" id="aboutContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 头像裁剪弹窗 ============ -->
+  <div id="avatarCropModal" class="avatar-crop-modal hidden">
+    <div class="avatar-crop-box">
+      <div class="avatar-crop-title">✂️ 裁剪头像</div>
+      <div class="avatar-crop-stage" id="avatarCropStage">
+        <img id="avatarCropImg" src="" alt="" />
+        <div class="avatar-crop-mask"></div>
+        <div class="avatar-crop-circle"></div>
+      </div>
+      <div class="avatar-crop-controls">
+        <span class="avatar-crop-zoom-label">🔍 缩放</span>
+        <input type="range" id="avatarCropZoom" class="avatar-crop-slider" min="50" max="300" value="100" />
+      </div>
+      <div class="avatar-crop-preview-row">
+        <span class="avatar-crop-preview-label">预览：</span>
+        <div class="avatar-crop-preview" id="avatarCropPreview"></div>
+        <span class="avatar-crop-hint">拖动图片调整位置，滑动条缩放</span>
+      </div>
+      <div class="avatar-crop-actions">
+        <button class="avatar-crop-btn avatar-crop-cancel" id="avatarCropCancel">取消</button>
+        <button class="avatar-crop-btn avatar-crop-confirm" id="avatarCropConfirm">✓ 确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 会议纪要面板 ============ -->
+  <div id="meetingPanel" class="meeting-panel hidden">
+    <div class="meeting-panel-header">
+      <span class="meeting-panel-title">🎙️ 会议纪要</span>
+      <button class="meeting-panel-close" title="关闭">✕</button>
+    </div>
+    <div class="meeting-content">
+      <!-- 录音控制区 -->
+      <div class="meeting-record-section">
+        <button class="meeting-record-btn" id="meetingRecordBtn">🔴 开始录音</button>
+        <span class="meeting-timer" id="meetingTimer">00:00</span>
+        <button class="meeting-upload-btn" id="meetingUploadBtn" title="上传音频文件转文字">📁 上传音频</button>
+      </div>
+      <!-- 状态提示 -->
+      <div class="meeting-status" id="meetingStatus"></div>
+      <!-- 转写文本区 -->
+      <div class="meeting-transcript-section">
+        <div class="meeting-section-label">📝 转写文本</div>
+        <div class="meeting-transcript" id="meetingTranscript" contenteditable="false"></div>
+      </div>
+      <!-- 纪要区 -->
+      <div class="meeting-summary-section">
+        <div class="meeting-section-label">
+          <span>📋 会议纪要</span>
+          <button class="meeting-summary-btn" id="meetingSummaryBtn">📝 生成纪要</button>
+        </div>
+        <div class="meeting-summary" id="meetingSummary"></div>
+      </div>
+      <!-- 文件保存提示 -->
+      <div class="meeting-files" id="meetingFiles"></div>
+    </div>
+  </div>
+
+  <script src="js/state.js"></script>
+  <script src="js/pet.js"></script>
+  <script src="js/markdown.js"></script>
+  <script src="js/interaction.js"></script>
+  <script src="js/movement.js"></script>
+  <script src="js/care.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/todo.js"></script>
+  <script src="js/skills.js"></script>
+  <script src="js/mcp.js"></script>
+  <script src="js/weather.js"></script>
+  <script src="js/fileops.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/ima.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/whoami.js"></script>
+  <script src="js/meeting.js"></script>
+  <script src="js/scheduled.js"></script>
+  <script src="js/renderer.js"></script>
+</body>
+</html>
+
