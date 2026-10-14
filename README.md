@@ -1,6 +1,6 @@
 # 🐱 小橘猫缘缘 — AI 桌面宠物
 
-**一个记得住你、也能替你动手干活的 Windows 桌面 AI 伴侣。**
+**既能长久记住你，也能代你完成多步骤实际工作的 Windows 桌面 AI 伴侣。**
 
 ![Platform](https://img.shields.io/badge/platform-Windows%20x64-blue)
 ![Electron](https://img.shields.io/badge/Electron-33-47848f)
@@ -16,7 +16,7 @@
 
 缘缘是一个常驻 Windows 桌面的 AI 助手，形象是一只小橘猫。
 
-和大多数"每次打开都从零开始"的聊天工具不同，它的重点是两件事：**记得住**你说过的每一句话，以及**干得了**多步骤的实际任务，同时在危险操作上留有人工确认。所有数据保存在本机。
+与「每次打开都从零开始」的聊天工具不同，它强调两件事：一是**记得住**——你说过的每一句话都会被妥善留存；二是**做得了**——能够独立执行多步骤的实际任务，并在危险操作前保留人工确认。所有数据均保存在本机。
 
 ## 核心特点
 
@@ -103,6 +103,8 @@ npm run icon           # 重新生成多尺寸 ICO
 ```
 
 **首次使用：** 复制 `config.example.json` 为 `config.json`，填入自己的模型 / TTS / 视觉 / 搜索 API Key 即可（该文件含密钥，请勿提交到公开仓库）。
+
+> **TTS / ASR 接口（可选）**：默认与主模型共用 `llm_api_base` / `llm_api_key`；如需接入其他服务商，在 `config.json` 中填入 `tts_api_base` / `tts_api_key`、`asr_api_base` / `asr_api_key` 即可，留空则自动跟随主模型。
 
 ---
 

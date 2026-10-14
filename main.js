@@ -119,6 +119,9 @@ const JINA_API_KEY = CFG.jina_api_key || '';
 
 // TTS 语音合成（mimo-v2.5-tts 等，OpenAI 兼容 chat/completions + audio 输出）
 const TTS_MODEL = CFG.tts_model || '';
+// TTS 接口地址/Key：不填或留空则跟随主模型（llm_api_base / llm_api_key），可单独指向其他服务商
+const TTS_API_BASE = CFG.tts_api_base || ARK_API_BASE;
+const TTS_API_KEY  = CFG.tts_api_key  || ARK_API_KEY;
 // 可选音色列表（mimo TTS 官方音色）；设置面板可切换，持久化到 config.json
 const TTS_VOICES = ['mimo_default', '冰糖', '茉莉', '苏打', '白桦', 'Mia', 'Chloe', 'Milo', 'Dean'];
 let TTS_VOICE = CFG.tts_voice || 'mimo_default';
@@ -126,6 +129,9 @@ let TTS_VOICE = CFG.tts_voice || 'mimo_default';
 let TTS_AUTO_READ = CFG.tts_auto_read === true || CFG.tts_auto_read === 'true';
 // ASR 语音识别（mimo-v2.5-asr 等，chat/completions + input_audio 输入）
 const ASR_MODEL = CFG.asr_model || '';
+// ASR 接口地址/Key：不填或留空则跟随主模型（llm_api_base / llm_api_key），可单独指向其他服务商
+const ASR_API_BASE = CFG.asr_api_base || ARK_API_BASE;
+const ASR_API_KEY  = CFG.asr_api_key  || ARK_API_KEY;
 
 // 视觉模型（截屏理解/图片分析）：优先用配置的独立视觉服务，未配置时自动复用主对话模型（mimo 等多模态可直接识图）
 const VISION_API_BASE = CFG.vision_api_base || ARK_API_BASE;
@@ -8102,16 +8108,16 @@ ipcMain.handle('ima:uploadMarkdown', async (_event, title, content) => {
 // 调用形态：chat/completions + modalities:[text,audio]，assistant 消息内容就是要朗读的文本
 // 非流式一把返回完整音频 base64（WAV/MP3），前端用 <audio> 播放
 ipcMain.handle('tts:speak', async (_event, text, voice) => {
-  if (!TTS_MODEL || !ARK_API_KEY || !ARK_API_BASE) {
-    return { success: false, error: '未配置 TTS 模型（config.json 的 tts_model）' };
+  if (!TTS_MODEL || !TTS_API_KEY || !TTS_API_BASE) {
+    return { success: false, error: '未配置 TTS（config.json 的 tts_model，接口地址/Key 默认跟随 llm_api_base / llm_api_key）' };
   }
   const speakText = String(text || '').slice(0, 2000).trim();
   if (!speakText) return { success: false, error: '没有要朗读的文本' };
   const useVoice = String(voice || TTS_VOICE || 'mimo_default');
   try {
-    const res = await fetchWithRetry(`${ARK_API_BASE}/chat/completions`, {
+    const res = await fetchWithRetry(`${TTS_API_BASE}/chat/completions`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ARK_API_KEY}` },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TTS_API_KEY}` },
       body: JSON.stringify({
         model: TTS_MODEL,
         messages: [
@@ -8139,8 +8145,8 @@ ipcMain.handle('tts:speak', async (_event, text, voice) => {
 // 流式 TTS：边合成边推送音频块给前端（tts:audio-chunk 事件），首块 ~700ms 到达即开始播放
 // 每个音频块是独立的 mini-WAV（RIFF 头），前端用 Web Audio 逐块解码无缝调度
 ipcMain.handle('tts:speakStream', async (event, text, voice, clientSession) => {
-  if (!TTS_MODEL || !ARK_API_KEY || !ARK_API_BASE) {
-    return { success: false, error: '未配置 TTS 模型（config.json 的 tts_model）' };
+  if (!TTS_MODEL || !TTS_API_KEY || !TTS_API_BASE) {
+    return { success: false, error: '未配置 TTS（config.json 的 tts_model，接口地址/Key 默认跟随 llm_api_base / llm_api_key）' };
   }
   const speakText = String(text || '').slice(0, 2000).trim();
   if (!speakText) return { success: false, error: '没有要朗读的文本' };
@@ -8148,9 +8154,9 @@ ipcMain.handle('tts:speakStream', async (event, text, voice, clientSession) => {
   // 会话 ID 必须用前端生成的（前端播放器按它过滤音频块），不能两边各自生成
   const session = clientSession || Date.now();
   try {
-    const res = await fetchWithRetry(`${ARK_API_BASE}/chat/completions`, {
+    const res = await fetchWithRetry(`${TTS_API_BASE}/chat/completions`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ARK_API_KEY}` },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TTS_API_KEY}` },
       body: JSON.stringify({
         model: TTS_MODEL,
         messages: [
@@ -8239,11 +8245,11 @@ ipcMain.handle('thinking:setConfig', (_event, cfg) => {
 // ============ ASR 语音识别（mimo-v2.5-asr 等，chat/completions + input_audio）============
 // 音频 base64 + 格式 → 转写文本。用于会议纪要录音转写（替代硅基流动转写，硅基流动配置保留作后备）
 async function asrTranscribe(audioBase64, format = 'wav') {
-  if (!ASR_MODEL || !ARK_API_KEY || !ARK_API_BASE) return null;
+  if (!ASR_MODEL || !ASR_API_KEY || !ASR_API_BASE) return null;
   try {
-    const res = await fetchWithRetry(`${ARK_API_BASE}/chat/completions`, {
+    const res = await fetchWithRetry(`${ASR_API_BASE}/chat/completions`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ARK_API_KEY}` },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ASR_API_KEY}` },
       body: JSON.stringify({
         model: ASR_MODEL,
         messages: [{

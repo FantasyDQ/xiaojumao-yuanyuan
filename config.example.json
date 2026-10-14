@@ -11,9 +11,13 @@
   "tavily_api_key": "YOUR_TAVILY_API_KEY",
   "jina_api_key": "YOUR_JINA_API_KEY",
   "tts_model": "your-tts-model",
+  "tts_api_base": "",
+  "tts_api_key": "",
   "tts_voice": "茉莉",
   "tts_auto_read": false,
   "asr_model": "your-asr-model",
+  "asr_api_base": "",
+  "asr_api_key": "",
   "vision_api_base": "https://your-vision-endpoint.example.com/v1",
   "vision_api_key": "YOUR_VISION_API_KEY",
   "vision_model": "your-vision-model"
