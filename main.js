@@ -132,6 +132,8 @@ const ASR_MODEL = CFG.asr_model || '';
 // ASR 接口地址/Key：不填或留空则跟随主模型（llm_api_base / llm_api_key），可单独指向其他服务商
 const ASR_API_BASE = CFG.asr_api_base || ARK_API_BASE;
 const ASR_API_KEY  = CFG.asr_api_key  || ARK_API_KEY;
+// ASR 后备通道（视觉服务上的 /audio/transcriptions 转写）用的模型，config.json 的 asr_fallback_model 可改
+const ASR_FALLBACK_MODEL = CFG.asr_fallback_model || 'FunAudioLLM/SenseVoiceSmall';
 
 // 视觉模型（截屏理解/图片分析）：优先用配置的独立视觉服务，未配置时自动复用主对话模型（mimo 等多模态可直接识图）
 const VISION_API_BASE = CFG.vision_api_base || ARK_API_BASE;
@@ -256,11 +258,46 @@ function buildSearchQuery(message) {
 const searchCache = new Map();
 const SEARCH_CACHE_TTL = 5 * 60 * 1000; // 5分钟
 
+// ===== OpenAI 兼容性垫片：thinking / max_tokens 是 MiMo 系扩展写法，标准接口会 400 拒收 =====
+// 首次被拒时自动改写请求并记住，之后所有请求直接用兼容写法 → 换任何 OpenAI 兼容服务零配置可用
+const LLM_COMPAT = { thinking: true, maxTokens: true };
+function llmCompatRewrite(bodyStr) {
+  try {
+    const o = JSON.parse(bodyStr);
+    let changed = false;
+    if (!LLM_COMPAT.thinking && 'thinking' in o) { delete o.thinking; changed = true; }
+    if (!LLM_COMPAT.maxTokens && 'max_tokens' in o && !('max_completion_tokens' in o)) {
+      o.max_completion_tokens = o.max_tokens; delete o.max_tokens; changed = true;
+    }
+    return changed ? JSON.stringify(o) : bodyStr;
+  } catch { return bodyStr; }
+}
 // 带重试的 fetch（网络失败 + 429限流 重试5次，429时等待2秒）
 async function fetchWithRetry(url, options, retries = 5, sender = null) {
+  if (typeof options?.body === 'string' && options.body.startsWith('{')) {
+    options = { ...options, body: llmCompatRewrite(options.body) };
+  }
   for (let i = 0; i <= retries; i++) {
     try {
       const res = await fetch(url, options);
+      // 参数兼容性探测：400/422 且报错指向 thinking / max_tokens → 改写后重试一次并记忆
+      if ((res.status === 400 || res.status === 422) && typeof options.body === 'string') {
+        const errText = await res.clone().text().catch(() => '');
+        let rewritten = null;
+        if (LLM_COMPAT.thinking && options.body.includes('"thinking"')
+            && /thinking/i.test(errText)
+            && /(unknown|unrecogni[sz]ed|unsupported|not supported|unexpected|not allowed|invalid|illegal|did you mean)/i.test(errText)) {
+          LLM_COMPAT.thinking = false;
+          console.warn('[pet:net] 接口不支持 thinking 字段（非 MiMo 系），已自动剥离并记忆');
+          rewritten = llmCompatRewrite(options.body);
+        } else if (LLM_COMPAT.maxTokens && options.body.includes('"max_tokens"')
+            && /max_tokens/i.test(errText) && /max_completion_tokens/i.test(errText)) {
+          LLM_COMPAT.maxTokens = false;
+          console.warn('[pet:net] 接口要求 max_completion_tokens（如 OpenAI o 系），已自动改写并记忆');
+          rewritten = llmCompatRewrite(options.body);
+        }
+        if (rewritten) return fetch(url, { ...options, body: rewritten });
+      }
       // 429 限流：指数退避重试（0.1s → 0.3s → 0.9s → 2.7s → 8.1s），同时通知前端
       if (res.status === 429 && i < retries) {
         const waitMs = Math.floor(100 * Math.pow(3, i)); // 100, 300, 900, 2700, 8100
@@ -5089,40 +5126,20 @@ ipcMain.handle('meeting:transcribe', async (_event, audioPath) => {
       }
     }
 
-    // ===== 后备：SiliconFlow SenseVoiceSmall（配置保留）=====
+    // ===== 后备：/audio/transcriptions 形态转写（默认 SiliconFlow SenseVoiceSmall，asr_fallback_model 可配）=====
     if (!text && VISION_API_KEY && VISION_API_BASE) {
-      const boundary = '----FormBoundary' + Math.random().toString(36).slice(2);
-      const parts = [];
-      // model 字段
-      parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="model"\r\n\r\nFunAudioLLM/SenseVoiceSmall\r\n`));
-      // file 字段
-      parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${fileName}"\r\nContent-Type: ${ext === '.wav' ? 'audio/wav' : ext === '.mp3' ? 'audio/mpeg' : 'audio/webm'}\r\n\r\n`));
-      parts.push(fileBuffer);
-      parts.push(Buffer.from(`\r\n--${boundary}--\r\n`));
-      const body = Buffer.concat(parts);
-
-      const res = await fetchWithRetry(`${VISION_API_BASE}/audio/transcriptions`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${VISION_API_KEY}`,
-          'Content-Type': `multipart/form-data; boundary=${boundary}`,
-        },
-        body,
-        signal: AbortSignal.timeout(120000), // 2 分钟超时，防止 API 卡死
-      });
-
-      if (!res.ok) {
-        const errText = await res.text();
-        console.warn(`[pet:meeting] ASR 失败 HTTP ${res.status}: ${errText.slice(0, 200)}`);
-        return { success: false, error: `ASR 服务返回 ${res.status}` };
+      const contentType = ext === '.wav' ? 'audio/wav' : ext === '.mp3' ? 'audio/mpeg' : 'audio/webm';
+      const r = await transcribeViaHttp(VISION_API_BASE, VISION_API_KEY, ASR_FALLBACK_MODEL, fileBuffer, fileName, contentType);
+      if (!r.ok) {
+        console.warn(`[pet:meeting] ASR 后备失败: ${r.error || ''}`);
+        return { success: false, error: ('ASR 后备转写失败：' + (r.error || '')).slice(0, 200) };
       }
-      const data = await res.json();
-      text = data.text || '';
-      console.log(`[pet:meeting] SiliconFlow 转写成功，文本长度: ${text.length}`);
+      text = r.text || '';
+      console.log(`[pet:meeting] 后备转写成功（${ASR_FALLBACK_MODEL}），文本长度: ${text.length}`);
     }
 
     if (!text) {
-      return { success: false, error: 'ASR 转写失败（mimo 和 SiliconFlow 都不可用）' };
+      return { success: false, error: 'ASR 转写失败（主通道与后备通道均不可用）' };
     }
 
     // 保存转写文本
@@ -8105,8 +8122,85 @@ ipcMain.handle('ima:uploadMarkdown', async (_event, title, content) => {
 });
 
 // ============ TTS 语音合成（mimo-v2.5-tts 等，OpenAI 兼容 audio 输出）============
-// 调用形态：chat/completions + modalities:[text,audio]，assistant 消息内容就是要朗读的文本
-// 非流式一把返回完整音频 base64（WAV/MP3），前端用 <audio> 播放
+// 调用形态：'chat' = chat/completions + modalities:[text,audio]（MiMo 系），assistant 消息内容就是要朗读的文本
+// 'speech' = /audio/speech（OpenAI 标准），input 文本 → 音频二进制
+// tts_api_type 可手动指定；'auto'（默认）先试 chat，遇协议错误自动改试 speech 并记住可用形态
+let TTS_PROTO = String(CFG.tts_api_type || 'auto').toLowerCase();
+function ttsProtoOrder() {
+  if (TTS_PROTO === 'chat' || TTS_PROTO === 'speech') return [TTS_PROTO];
+  return ['chat', 'speech'];
+}
+// 协议不匹配的特征：404/405/415，或 400/422 报错指向 modalities/audio/speech 等不支持的参数
+function isProtocolMismatch(status, errText) {
+  if (status === 404 || status === 405 || status === 415) return true;
+  return (status === 400 || status === 422)
+    && /(modalit|input_audio|audio|speech|unknown parameter|unsupported parameter|not supported|unrecognized|extra field|did you mean)/i.test(errText || '');
+}
+// chat/completions 形态：非流式返回完整音频 base64，流式把音频块（独立 mini-WAV）实时回调
+async function ttsViaChat(speakText, useVoice, stream, onChunk) {
+  const res = await fetchWithRetry(`${TTS_API_BASE}/chat/completions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TTS_API_KEY}` },
+    body: JSON.stringify({
+      model: TTS_MODEL,
+      messages: [
+        { role: 'user', content: '请朗读' },
+        { role: 'assistant', content: speakText },
+      ],
+      modalities: ['text', 'audio'],
+      audio: { format: 'wav', voice: useVoice },
+      stream: !!stream,
+    }),
+  });
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    return { success: false, mismatch: isProtocolMismatch(res.status, errText), error: `TTS 返回 ${res.status}: ${errText.slice(0, 200)}` };
+  }
+  if (!stream) {
+    const data = await res.json();
+    const audioB64 = data.choices?.[0]?.message?.audio?.data;
+    if (!audioB64) return { success: false, mismatch: false, error: 'TTS 未返回音频数据' };
+    return { success: true, audio: audioB64, format: 'wav', voice: useVoice };
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let chunkCount = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop();
+    for (const line of lines) {
+      const t = line.trim();
+      if (!t || !t.startsWith('data:')) continue;
+      const data = t.slice(5).trim();
+      if (data === '[DONE]') continue;
+      try {
+        const json = JSON.parse(data);
+        const audio = json.choices?.[0]?.delta?.audio;
+        if (audio && audio.data) { chunkCount++; if (onChunk) onChunk(chunkCount, audio.data); }
+      } catch (e) {}
+    }
+  }
+  return { success: true, chunks: chunkCount };
+}
+// /audio/speech 形态（OpenAI 标准）：一次返回完整音频二进制（非流式）
+async function ttsViaSpeech(speakText, useVoice) {
+  const res = await fetchWithRetry(`${TTS_API_BASE}/audio/speech`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TTS_API_KEY}` },
+    body: JSON.stringify({ model: TTS_MODEL, voice: useVoice, input: speakText, response_format: 'wav' }),
+  });
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    return { success: false, mismatch: isProtocolMismatch(res.status, errText), error: `TTS 返回 ${res.status}: ${errText.slice(0, 200)}` };
+  }
+  const buf = Buffer.from(await res.arrayBuffer());
+  if (!buf.length) return { success: false, mismatch: false, error: 'TTS 未返回音频数据' };
+  return { success: true, audio: buf.toString('base64'), format: 'wav', voice: useVoice };
+}
 ipcMain.handle('tts:speak', async (_event, text, voice) => {
   if (!TTS_MODEL || !TTS_API_KEY || !TTS_API_BASE) {
     return { success: false, error: '未配置 TTS（config.json 的 tts_model，接口地址/Key 默认跟随 llm_api_base / llm_api_key）' };
@@ -8114,36 +8208,23 @@ ipcMain.handle('tts:speak', async (_event, text, voice) => {
   const speakText = String(text || '').slice(0, 2000).trim();
   if (!speakText) return { success: false, error: '没有要朗读的文本' };
   const useVoice = String(voice || TTS_VOICE || 'mimo_default');
-  try {
-    const res = await fetchWithRetry(`${TTS_API_BASE}/chat/completions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TTS_API_KEY}` },
-      body: JSON.stringify({
-        model: TTS_MODEL,
-        messages: [
-          { role: 'user', content: '请朗读' },
-          { role: 'assistant', content: speakText },
-        ],
-        modalities: ['text', 'audio'],
-        audio: { format: 'wav', voice: useVoice },
-        stream: false,
-      }),
-    });
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      return { success: false, error: `TTS 返回 ${res.status}: ${errText.slice(0, 200)}` };
-    }
-    const data = await res.json();
-    const audioB64 = data.choices?.[0]?.message?.audio?.data;
-    if (!audioB64) return { success: false, error: 'TTS 未返回音频数据' };
-    return { success: true, audio: audioB64, format: 'wav', voice: useVoice };
-  } catch (e) {
-    return { success: false, error: e.message };
+  let lastErr = '';
+  for (const proto of ttsProtoOrder()) {
+    try {
+      const r = proto === 'speech'
+        ? await ttsViaSpeech(speakText, useVoice)
+        : await ttsViaChat(speakText, useVoice, false, null);
+      if (r.success) { if (TTS_PROTO === 'auto') TTS_PROTO = proto; return r; }
+      lastErr = r.error || lastErr;
+      if (!r.mismatch) break; // 非协议问题（鉴权/参数/服务错误），换协议也没用
+    } catch (e) { lastErr = e.message; }
   }
+  return { success: false, error: lastErr || 'TTS 失败' };
 });
 
 // 流式 TTS：边合成边推送音频块给前端（tts:audio-chunk 事件），首块 ~700ms 到达即开始播放
 // 每个音频块是独立的 mini-WAV（RIFF 头），前端用 Web Audio 逐块解码无缝调度
+// /audio/speech 形态不支持流式：整段音频作为单块推送，前端播放器兼容
 ipcMain.handle('tts:speakStream', async (event, text, voice, clientSession) => {
   if (!TTS_MODEL || !TTS_API_KEY || !TTS_API_BASE) {
     return { success: false, error: '未配置 TTS（config.json 的 tts_model，接口地址/Key 默认跟随 llm_api_base / llm_api_key）' };
@@ -8153,55 +8234,29 @@ ipcMain.handle('tts:speakStream', async (event, text, voice, clientSession) => {
   const useVoice = String(voice || TTS_VOICE || 'mimo_default');
   // 会话 ID 必须用前端生成的（前端播放器按它过滤音频块），不能两边各自生成
   const session = clientSession || Date.now();
-  try {
-    const res = await fetchWithRetry(`${TTS_API_BASE}/chat/completions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TTS_API_KEY}` },
-      body: JSON.stringify({
-        model: TTS_MODEL,
-        messages: [
-          { role: 'user', content: '请朗读' },
-          { role: 'assistant', content: speakText },
-        ],
-        modalities: ['text', 'audio'],
-        audio: { format: 'wav', voice: useVoice },
-        stream: true,
-      }),
-    });
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      return { success: false, error: `TTS 返回 ${res.status}: ${errText.slice(0, 200)}` };
-    }
-    // 解析 SSE 流，音频块实时推送前端
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let chunkCount = 0;
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
-      for (const line of lines) {
-        const t = line.trim();
-        if (!t || !t.startsWith('data:')) continue;
-        const data = t.slice(5).trim();
-        if (data === '[DONE]') continue;
-        try {
-          const json = JSON.parse(data);
-          const audio = json.choices?.[0]?.delta?.audio;
-          if (audio && audio.data) {
-            chunkCount++;
-            try { event.sender.send('tts:audio-chunk', { session, seq: chunkCount, data: audio.data }); } catch (e) {}
-          }
-        } catch (e) {}
+  let lastErr = '';
+  for (const proto of ttsProtoOrder()) {
+    try {
+      if (proto === 'speech') {
+        const r = await ttsViaSpeech(speakText, useVoice);
+        if (r.success) {
+          if (TTS_PROTO === 'auto') TTS_PROTO = proto;
+          try { event.sender.send('tts:audio-chunk', { session, seq: 1, data: r.audio }); } catch (e) {}
+          return { success: true, chunks: 1, session };
+        }
+        lastErr = r.error || lastErr;
+        if (!r.mismatch) break;
+      } else {
+        const r = await ttsViaChat(speakText, useVoice, true, (seq, data) => {
+          try { event.sender.send('tts:audio-chunk', { session, seq, data }); } catch (e) {}
+        });
+        if (r.success) { if (TTS_PROTO === 'auto') TTS_PROTO = proto; return { success: true, chunks: r.chunks, session }; }
+        lastErr = r.error || lastErr;
+        if (!r.mismatch) break;
       }
-    }
-    return { success: true, chunks: chunkCount, session };
-  } catch (e) {
-    return { success: false, error: e.message };
+    } catch (e) { lastErr = e.message; }
   }
+  return { success: false, error: lastErr || 'TTS 失败' };
 });
 
 // TTS 音色配置（设置面板用）：get 返回当前音色+可选列表，set 持久化到 config.json
@@ -8242,35 +8297,83 @@ ipcMain.handle('thinking:setConfig', (_event, cfg) => {
   return { success: ok1 && ok2, mode, effort };
 });
 
-// ============ ASR 语音识别（mimo-v2.5-asr 等，chat/completions + input_audio）============
-// 音频 base64 + 格式 → 转写文本。用于会议纪要录音转写（替代硅基流动转写，硅基流动配置保留作后备）
+// ============ ASR 语音识别（chat/completions + input_audio 或 /audio/transcriptions）============
+// 音频 base64 + 格式 → 转写文本。用于会议纪要录音转写
+// 'chat' = chat/completions + input_audio（MiMo 系）；'transcriptions' = /audio/transcriptions（OpenAI 标准）
+// asr_api_type 可手动指定；'auto'（默认）先试 chat，遇协议错误自动改试 transcriptions 并记住可用形态
+let ASR_PROTO = String(CFG.asr_api_type || 'auto').toLowerCase();
+function asrProtoOrder() {
+  if (ASR_PROTO === 'chat' || ASR_PROTO === 'transcriptions') return [ASR_PROTO];
+  return ['chat', 'transcriptions'];
+}
+// /audio/transcriptions 形态转写（multipart）：ASR 主通道与会议后备通道共用
+async function transcribeViaHttp(base, key, model, fileBuffer, fileName, contentType) {
+  const boundary = '----FormBoundary' + Math.random().toString(36).slice(2);
+  const parts = [];
+  parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="model"\r\n\r\n${model}\r\n`));
+  parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${fileName}"\r\nContent-Type: ${contentType}\r\n\r\n`));
+  parts.push(fileBuffer);
+  parts.push(Buffer.from(`\r\n--${boundary}--\r\n`));
+  const res = await fetchWithRetry(`${base}/audio/transcriptions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${key}`,
+      'Content-Type': `multipart/form-data; boundary=${boundary}`,
+    },
+    body: Buffer.concat(parts),
+    signal: AbortSignal.timeout(120000), // 2 分钟超时，防止 API 卡死
+  });
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    return { ok: false, mismatch: isProtocolMismatch(res.status, errText), error: `转写返回 ${res.status}: ${errText.slice(0, 200)}` };
+  }
+  const data = await res.json().catch(() => ({}));
+  return { ok: true, text: String(data.text || '').trim() };
+}
 async function asrTranscribe(audioBase64, format = 'wav') {
   if (!ASR_MODEL || !ASR_API_KEY || !ASR_API_BASE) return null;
-  try {
-    const res = await fetchWithRetry(`${ASR_API_BASE}/chat/completions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ASR_API_KEY}` },
-      body: JSON.stringify({
-        model: ASR_MODEL,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'input_audio', input_audio: { data: audioBase64, format } },
-          ],
-        }],
-        stream: false,
-      }),
-    });
-    if (!res.ok) {
-      console.warn(`[pet:asr] mimo ASR 返回 ${res.status}`);
-      return null;
-    }
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content || null;
-  } catch (e) {
-    console.warn(`[pet:asr] mimo ASR 异常: ${e.message}`);
-    return null;
+  const extMap = { wav: 'wav', mp3: 'mp3', webm: 'webm', ogg: 'ogg', m4a: 'm4a' };
+  const ext = extMap[format] || 'wav';
+  const contentType = ext === 'wav' ? 'audio/wav' : ext === 'mp3' ? 'audio/mpeg' : 'audio/webm';
+  let lastErr = '';
+  for (const proto of asrProtoOrder()) {
+    try {
+      if (proto === 'transcriptions') {
+        const r = await transcribeViaHttp(ASR_API_BASE, ASR_API_KEY, ASR_MODEL, Buffer.from(audioBase64, 'base64'), `audio.${ext}`, contentType);
+        if (r.ok && r.text) { if (ASR_PROTO === 'auto') ASR_PROTO = proto; return r.text; }
+        lastErr = r.error || lastErr;
+        if (!r.mismatch) break; // 非协议问题，换形态也没用
+      } else {
+        const res = await fetchWithRetry(`${ASR_API_BASE}/chat/completions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ASR_API_KEY}` },
+          body: JSON.stringify({
+            model: ASR_MODEL,
+            messages: [{
+              role: 'user',
+              content: [
+                { type: 'input_audio', input_audio: { data: audioBase64, format: ext } },
+              ],
+            }],
+            stream: false,
+          }),
+        });
+        if (!res.ok) {
+          const errText = await res.text().catch(() => '');
+          lastErr = `ASR 返回 ${res.status}`;
+          if (isProtocolMismatch(res.status, errText)) continue;
+          break;
+        }
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content || null;
+        if (text) { if (ASR_PROTO === 'auto') ASR_PROTO = proto; return text; }
+        lastErr = 'ASR 未返回文本';
+        break;
+      }
+    } catch (e) { lastErr = e.message; }
   }
+  console.warn(`[pet:asr] 转写失败: ${lastErr}`);
+  return null;
 }
 
 // ============ 提醒下发（带回执） ============

@@ -104,7 +104,7 @@ npm run icon           # 重新生成多尺寸 ICO
 
 **首次使用：** 复制 `config.example.json` 为 `config.json`，填入自己的模型 / TTS / 视觉 / 搜索 API Key 即可（该文件含密钥，请勿提交到公开仓库）。
 
-> **TTS / ASR 接口（可选）**：默认与主模型共用 `llm_api_base` / `llm_api_key`；如需接入其他服务商，在 `config.json` 中填入 `tts_api_base` / `tts_api_key`、`asr_api_base` / `asr_api_key` 即可，留空则自动跟随主模型。
+> **接口通用性**：LLM / TTS / ASR 全面兼容 OpenAI 协议——非标准扩展字段（如 `thinking`）被拒时自动改写重试，换任何 OpenAI 兼容服务商零配置可用。TTS 支持 `chat/completions` 音频输出（MiMo 系）与 `/audio/speech`（OpenAI 标准）双形态，ASR 支持 `input_audio` 与 `/audio/transcriptions` 双形态，默认自动探测（`tts_api_type` / `asr_api_type` 可手动指定）。接口地址 / Key 默认跟随主模型，也可用 `tts_api_base` / `tts_api_key`、`asr_api_base` / `asr_api_key` 单独指定；会议转写后备模型由 `asr_fallback_model` 配置。
 
 ---
 
