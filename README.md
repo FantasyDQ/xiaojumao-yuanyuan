@@ -102,7 +102,7 @@ npm run dist:portable  # 仅免安装版（小橘猫缘缘-免安装版-x.y.z.ex
 npm run icon           # 重新生成多尺寸 ICO
 ```
 
-**首次使用：** 复制 `config.example.json` 为 `config.json`，填入自己的模型 / TTS / 视觉 / 搜索 API Key 即可（该文件含密钥，请勿提交到公开仓库）。
+**首次使用：** 把 `config.example.json` 重命名（或复制）为 `config.json`——即去掉文件名里的 `.example`——再填入自己的模型 / TTS / 视觉 / 搜索 API Key。**填完请把 `config.example.json` 删掉，真实 Key 只写进 `config.json`**：`config.json` 已被 `.gitignore` 忽略、不会上传；而 `config.example.json` 是随仓库提交的，把真实 Key 填进去会造成泄露。
 
 > **接口通用性**：LLM / TTS / ASR 全面兼容 OpenAI 协议——非标准扩展字段（如 `thinking`）被拒时自动改写重试，换任何 OpenAI 兼容服务商零配置可用。TTS 支持 `chat/completions` 音频输出（MiMo 系）与 `/audio/speech`（OpenAI 标准）双形态，ASR 支持 `input_audio` 与 `/audio/transcriptions` 双形态，默认自动探测（`tts_api_type` / `asr_api_type` 可手动指定）。接口地址 / Key 默认跟随主模型，也可用 `tts_api_base` / `tts_api_key`、`asr_api_base` / `asr_api_key` 单独指定；会议转写后备模型由 `asr_fallback_model` 配置。
 
@@ -117,7 +117,7 @@ xiaojumao-yuanyuan/
 │                          #   窗口与托盘、全部 IPC handler
 ├── preload.js             # contextBridge 安全暴露 window.pet API（IPC 受控通道）
 ├── history-db.js          # 情景记忆：sql.js(WASM SQLite) 摘要索引表 + 原文表
-├── config.example.json    # 配置模板：复制为 config.json 后填入自己的 Key
+├── config.example.json    # 配置模板：去掉 .example 后缀改名为 config.json，填完 Key 后删除模板
 ├── src/                   # 渲染进程展示层
 │   ├── index.html         # 窗口结构（~800 行）
 │   ├── css/main.css       # 橘猫主题样式（~2400 行）
