@@ -6,7 +6,7 @@
 ![Electron](https://img.shields.io/badge/Electron-33-47848f)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-[能力规格](CAPABILITIES.md) · [设计哲学](DESIGN.md) · [main.js 索引](main_js_index.md)
+[能力规格](CAPABILITIES.md) · [设计哲学](DESIGN.md)
 
 ![小橘猫缘缘界面预览](docs/screenshot.png)
 
@@ -144,8 +144,7 @@ xiaojumao-yuanyuan/
 ├── build/                 # icon.ico / icon.png 应用图标
 ├── config-build/          # 配置打包工具（独立小应用）
 ├── CAPABILITIES.md        # 能力规格：所有功能与实现机制（可逐条回溯到源码）
-├── DESIGN.md              # 设计哲学：三条原则、记忆分层、生命感、工程纪律
-└── main_js_index.md       # main.js 完整定义索引（函数 / 常量 / IPC / 工具清单）
+└── DESIGN.md              # 设计哲学：三条原则、记忆分层、生命感、工程纪律
 ```
 
 **分层约定**：`main.js` 是能力层（LLM、工具、记忆、系统操作全在这里），`src/` 是纯展示层，两者只经 `preload.js` 暴露的 `window.pet` IPC 通道通信。改能力去 `main.js`，改表现去 `src/`，一份逻辑不要写两遍。
@@ -172,7 +171,6 @@ xiaojumao-yuanyuan/
 |---|---|
 | [CAPABILITIES.md](CAPABILITIES.md) | 系统概览、对话与推理、Agent 执行、记忆与检索、代码执行、文件与文档、外部集成、语音多模态、定时自动化、可靠性与安全、已知约束 |
 | [DESIGN.md](DESIGN.md) | 三条贯穿一切的原则、记忆四层的取舍、生命感与走位、人格、人机边界、降级矩阵、工程纪律 |
-| [main_js_index.md](main_js_index.md) | `main.js` 全部函数 / 常量 / IPC channel / 工具定义的行号索引 |
 
 ---
 
