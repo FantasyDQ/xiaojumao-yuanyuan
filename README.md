@@ -106,6 +106,8 @@ npm run icon           # 重新生成多尺寸 ICO
 
 > **接口通用性**：LLM / TTS / ASR 全面兼容 OpenAI 协议——非标准扩展字段（如 `thinking`）被拒时自动改写重试，换任何 OpenAI 兼容服务商零配置可用。TTS 支持 `chat/completions` 音频输出（MiMo 系）与 `/audio/speech`（OpenAI 标准）双形态，ASR 支持 `input_audio` 与 `/audio/transcriptions` 双形态，默认自动探测（`tts_api_type` / `asr_api_type` 可手动指定）。接口地址 / Key 默认跟随主模型，也可用 `tts_api_base` / `tts_api_key`、`asr_api_base` / `asr_api_key` 单独指定；会议转写后备模型由 `asr_fallback_model` 配置。
 
+> **可选能力配置（在应用内完成，不进 `config.json`）**：**IMA 知识库**需要填入你自己的 **Client ID / API Key**——点聊天栏「📚 知识库」按钮打开面板，在「配置」页填写后点「测试连接」验证（知识库 ID 可留空，搜索时再选）；**邮箱**（SMTP / IMAP）与 **MCP 服务**也在设置面板里配置。这些配置保存在本机用户数据目录，不会上传。
+
 ---
 
 ## 📁 项目结构
